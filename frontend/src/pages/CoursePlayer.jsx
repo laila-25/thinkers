@@ -1,0 +1,19 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router';
+import api from '../api/client';
+import QuizPlayer from '../components/QuizPlayer';
+
+export default function CoursePlayer() {
+  const { enrollmentId, lessonId } = useParams();
+  const [enrollment, setEnrollment] = useState(null); const [lesson, setLesson] = useState(null); const [error, setError] = useState(''); const timer = useRef();
+  const lessons = useMemo(() => enrollment?.sections.flatMap(section => section.lessons) || [], [enrollment]);
+  const refresh = () => api.get(`/api/learning/enrollments/${enrollmentId}`).then(({ data }) => setEnrollment(data.data));
+  useEffect(() => { setError(''); refresh().catch(() => setError('You do not have access to this course.')); }, [enrollmentId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const id = lessonId || enrollment?.last_accessed_lesson_id || lessons[0]?.id; if (id) api.get(`/api/learning/lessons/${id}`).then(({ data }) => setLesson(data.data)).catch(() => setError('This lesson is unavailable.')); }, [lessonId, enrollment?.last_accessed_lesson_id, lessons]);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const progress = async (status, percentage, position = 0) => { try { const { data } = await api.put(`/api/enrollments/${enrollmentId}/lessons/${lesson.id}/progress`, { status, completion_percentage: percentage, playback_position: Math.floor(position) }); setEnrollment(data.data); } catch (e) { setError(e.response?.data?.message || 'Progress could not be saved.'); } };
+  const track = event => { clearTimeout(timer.current); const video = event.currentTarget; timer.current = setTimeout(() => progress('in_progress', video.duration ? Math.min(99, Math.floor(video.currentTime / video.duration * 100)) : 0, video.currentTime), 1500); };
+  if (error) return <div className="max-w-5xl mx-auto py-20 text-red-700">{error}</div>;
+  if (!enrollment || !lesson) return <div className="py-20 text-center">Loading course player...</div>;
+  return <section className="max-w-7xl mx-auto px-4 py-10"><header className="mb-6"><h1 className="text-2xl font-bold">{enrollment.course.title}</h1><p>{enrollment.completion_percentage}% complete</p></header><div className="grid lg:grid-cols-4 gap-6"><aside className="space-y-4">{enrollment.sections.map(section => <div key={section.id} className="bg-white border rounded-xl p-3"><h2 className="font-bold">{section.title}</h2>{section.lessons.map(item => <Link key={item.id} to={`/learn/${enrollmentId}/lessons/${item.id}`} className={`block p-2 mt-1 rounded ${item.id === lesson.id ? 'bg-sky-50 text-accent' : ''}`}>{item.title}<small className="block">{item.progress?.completion_percentage || 0}%</small></Link>)}</div>)}</aside><main className="lg:col-span-3 bg-white border rounded-2xl p-6"><h2 className="text-2xl font-bold">{lesson.title}</h2><p className="mt-2 text-slate-500">{lesson.description}</p><div className="mt-6">{lesson.content_type === 'text' && <div className="lesson-content" dangerouslySetInnerHTML={{ __html: lesson.text_content || '<p>No content has been added yet.</p>' }} />}{lesson.content_type === 'video' && (lesson.video ? <video className="w-full rounded-xl bg-black" controls crossOrigin="use-credentials" src={lesson.video.stream_url} onTimeUpdate={track} onEnded={() => progress('completed', 100)} /> : <p>Video is not available yet.</p>)}{lesson.content_type === 'quiz' && <QuizPlayer lesson={lesson} onProgressChanged={refresh} />}</div><div className="mt-8"><h3 className="font-bold">Resources</h3>{lesson.attachments?.map(item => <a key={item.id} className="block mt-2 text-accent" href={item.download_url}>{item.display_name}</a>)}</div>{lesson.content_type !== 'quiz' && <button onClick={() => progress('completed', 100)} className="mt-8 action">Mark lesson complete</button>}</main></div></section>;
+}
