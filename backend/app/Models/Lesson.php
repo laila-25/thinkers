@@ -43,4 +43,9 @@ class Lesson extends Model
     {
         return $this->hasOne(Quiz::class);
     }
+
+    public function aiConversations(): HasMany
+    {
+        return $this->hasMany(AIConversation::class);
+    }
 }

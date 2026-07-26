@@ -10,6 +10,11 @@ use Illuminate\Validation\ValidationException;
 
 class ProgressService
 {
+    public function __construct(
+        private readonly GamificationService $gamification,
+        private readonly CertificateService $certificates,
+    ) {}
+
     public function update(Enrollment $enrollment, Lesson $lesson, array $data): Progress
     {
         if ($lesson->section->course_id !== $enrollment->course_id || ! $lesson->is_published) {
@@ -32,10 +37,31 @@ class ProgressService
         $existing = $enrollment->progress()->where('lesson_id', $lesson->id)->first();
         if (! $passed && $existing?->status === 'completed') {
             $enrollment->update(['last_accessed_lesson_id' => $lesson->id]);
+
             return $existing;
         }
 
         return $this->persist($enrollment, $lesson, $passed ? 'completed' : 'in_progress', $passed ? 100 : min($percentage, 99), 0);
+    }
+
+    public function updateInteraction(Enrollment $enrollment, Lesson $lesson, array $data): Progress
+    {
+        if ($lesson->section->course_id !== $enrollment->course_id || ! $lesson->is_published) {
+            throw ValidationException::withMessages(['lesson' => 'This lesson is not available in the enrolled course.']);
+        }
+
+        return DB::transaction(function () use ($enrollment, $lesson, $data): Progress {
+            $progress = Progress::firstOrCreate(
+                ['enrollment_id' => $enrollment->id, 'lesson_id' => $lesson->id],
+                ['status' => 'not_started']
+            );
+            $progress->fill($data);
+            $progress->last_accessed_at = now();
+            $progress->save();
+            $enrollment->update(['last_accessed_lesson_id' => $lesson->id]);
+
+            return $progress;
+        });
     }
 
     private function persist(Enrollment $enrollment, Lesson $lesson, string $status, int $percentage, int $playbackPosition): Progress
@@ -55,10 +81,21 @@ class ProgressService
             );
 
             $enrollment->update(['last_accessed_lesson_id' => $lesson->id]);
+            $user = $enrollment->user()->firstOrFail();
+            if ($status === 'completed') {
+                $this->gamification->recordLessonCompletion($user, $lesson->id);
+            } else {
+                $this->gamification->recordActivity($user);
+            }
             $totalLessons = Lesson::whereHas('section', fn ($query) => $query->where('course_id', $enrollment->course_id))->where('is_published', true)->count();
-            $completedLessons = $enrollment->progress()->where('status', 'completed')->count();
+            $completedLessons = $enrollment->progress()
+                ->where('status', 'completed')
+                ->whereHas('lesson', fn ($query) => $query->where('is_published', true))
+                ->count();
             if ($totalLessons > 0 && $completedLessons === $totalLessons) {
                 $enrollment->update(['status' => 'completed', 'completed_at' => now()]);
+                $this->gamification->recordCourseCompletion($user, $enrollment->course_id);
+                $this->certificates->issueForCompletedEnrollment($enrollment->fresh());
             }
 
             return $progress->load('lesson');

@@ -14,12 +14,12 @@ class CoursePolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('instructor');
+        return $user->isApprovedInstructor();
     }
 
     public function update(User $user, Course $course): bool
     {
-        return $user->hasRole('instructor')
+        return $user->isApprovedInstructor()
             && $course->instructor_id === $user->id
             && in_array($course->status, ['draft', 'rejected'], true);
     }

@@ -15,13 +15,15 @@ class CoursePlayerController extends Controller
     {
         Gate::authorize('view', $enrollment);
         abort_unless(in_array($enrollment->status, ['active', 'completed'], true), 403, 'This enrollment no longer grants course access.');
+
         return new EnrollmentResource($enrollment->load(['course.instructor:id,name', 'course.category', 'course.sections.lessons', 'progress', 'lastAccessedLesson']));
     }
 
     public function lesson(Lesson $lesson): LessonContentResource
     {
         Gate::authorize('view', $lesson);
-        abort_unless($lesson->is_published || auth()->user()?->hasAnyRole(['instructor', 'admin']), 404);
+        abort_unless($lesson->is_published || auth()->user()?->hasRole('admin') || auth()->user()?->isApprovedInstructor(), 404);
+
         return new LessonContentResource($lesson->load(['video', 'attachments', 'quiz']));
     }
 }

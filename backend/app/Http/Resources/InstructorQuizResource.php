@@ -16,6 +16,7 @@ class InstructorQuizResource extends JsonResource
             'status' => $this->status, 'is_locked' => $this->attempts()->exists(),
             'questions' => $this->whenLoaded('questions', fn () => $this->questions->map(fn ($question) => [
                 'id' => $question->id, 'question_text' => $question->question_text,
+                'explanation' => $question->explanation,
                 'question_type' => $question->question_type, 'points' => $question->points, 'position' => $question->position,
                 'options' => $question->answers->map(fn ($answer) => [
                     'id' => $answer->id, 'option_text' => $answer->option_text,

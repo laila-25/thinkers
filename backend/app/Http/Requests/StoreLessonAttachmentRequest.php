@@ -14,7 +14,7 @@ class StoreLessonAttachmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'max:51200', 'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,txt'],
+            'file' => ['required', 'file', 'max:51200', 'mimes:pdf,zip,doc,docx,ppt,pptx,xls,xlsx,txt'],
             'display_name' => ['nullable', 'string', 'max:255'],
         ];
     }

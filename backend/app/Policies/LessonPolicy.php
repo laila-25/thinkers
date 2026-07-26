@@ -21,7 +21,7 @@ class LessonPolicy
         if (! $user) {
             return false;
         }
-        if ($user->hasRole('instructor') && $lesson->section->course->instructor_id === $user->id) {
+        if ($user->isApprovedInstructor() && $lesson->section->course->instructor_id === $user->id) {
             return true;
         }
 

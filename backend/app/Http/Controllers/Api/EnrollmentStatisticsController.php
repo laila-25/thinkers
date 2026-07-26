@@ -12,7 +12,7 @@ class EnrollmentStatisticsController extends Controller
     public function show(Request $request, Course $course): JsonResponse
     {
         $allowed = $request->user()->hasRole('admin')
-            || ($request->user()->hasRole('instructor') && $course->instructor_id === $request->user()->id);
+            || ($request->user()->isApprovedInstructor() && $course->instructor_id === $request->user()->id);
         abort_unless($allowed, 403);
 
         $counts = $course->enrollments()->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');

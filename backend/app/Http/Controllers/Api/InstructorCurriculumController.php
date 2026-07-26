@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Http\Resources\LessonContentResource;
+use App\Models\Course;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +12,7 @@ class InstructorCurriculumController extends Controller
 {
     public function show(Request $request, Course $course): JsonResponse
     {
-        abort_unless($request->user()->hasRole('admin') || ($request->user()->hasRole('instructor') && $course->instructor_id === $request->user()->id), 403);
+        abort_unless($request->user()->hasRole('admin') || ($request->user()->isApprovedInstructor() && $course->instructor_id === $request->user()->id), 403);
         $course->load(['sections.lessons.video', 'sections.lessons.attachments']);
 
         return response()->json(['data' => [

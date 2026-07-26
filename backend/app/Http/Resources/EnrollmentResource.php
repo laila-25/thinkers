@@ -24,6 +24,9 @@ class EnrollmentResource extends JsonResource
                         'playback_position' => $progress->playback_position,
                         'last_accessed_at' => $progress->last_accessed_at,
                         'completed_at' => $progress->completed_at,
+                        'notes' => $progress->notes,
+                        'is_bookmarked' => $progress->is_bookmarked,
+                        'is_important' => $progress->is_important,
                     ] : null;
 
                     return $lesson;

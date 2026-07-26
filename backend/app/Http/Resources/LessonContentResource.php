@@ -29,7 +29,7 @@ class LessonContentResource extends JsonResource
                 'file_size' => $this->video->file_size,
                 'duration_seconds' => $this->video->duration_seconds,
                 'processing_status' => $this->video->processing_status,
-                'stream_url' => route('lessons.video.stream', $this->resource),
+                'stream_url' => route('lessons.video.stream', $this->resource, absolute: false),
             ] : null),
             'attachments' => $this->whenLoaded('attachments', fn () => $this->attachments->map(fn ($attachment) => [
                 'id' => $attachment->id,
@@ -37,7 +37,7 @@ class LessonContentResource extends JsonResource
                 'original_name' => $attachment->original_name,
                 'mime_type' => $attachment->mime_type,
                 'file_size' => $attachment->file_size,
-                'download_url' => route('attachments.download', $attachment),
+                'download_url' => route('attachments.download', $attachment, absolute: false),
             ])),
         ];
     }

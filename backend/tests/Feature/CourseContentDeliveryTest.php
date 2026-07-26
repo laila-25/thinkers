@@ -57,6 +57,10 @@ class CourseContentDeliveryTest extends TestCase
 
         Storage::disk('course_media')->assertExists($lesson->fresh()->video->path);
         $this->assertNotEmpty($response->json('data.video.stream_url'));
+        $this->assertSame(
+            "/api/learning/lessons/{$lesson->id}/video",
+            $response->json('data.video.stream_url')
+        );
     }
 
     public function test_laravel_accepts_the_approved_video_size_boundary(): void
@@ -87,6 +91,60 @@ class CourseContentDeliveryTest extends TestCase
         $this->getJson("/api/preview/lessons/{$lesson->id}")->assertNotFound();
         $lesson->update(['is_preview' => true]);
         $this->getJson("/api/preview/lessons/{$lesson->id}")->assertOk();
+    }
+
+    public function test_video_delivery_supports_byte_ranges_without_weakening_authorization(): void
+    {
+        [$course, , $lesson] = $this->courseWithLesson('video', published: true);
+        $this->attachReadyVideo($lesson);
+        $lesson->update(['is_preview' => true]);
+
+        $this->withHeader('Range', 'bytes=0-1023')
+            ->get("/api/preview/lessons/{$lesson->id}/video")
+            ->assertStatus(206)
+            ->assertHeader('accept-ranges', 'bytes')
+            ->assertHeader('content-range', 'bytes 0-1023/4096')
+            ->assertHeader('content-length', '1024');
+
+        $lesson->update(['is_preview' => false]);
+        $student = User::factory()->create();
+        $student->assignRole('student');
+
+        $this->actingAs($student)
+            ->withHeader('Range', 'bytes=0-1023')
+            ->get("/api/learning/lessons/{$lesson->id}/video")
+            ->assertForbidden();
+
+        Enrollment::create([
+            'user_id' => $student->id,
+            'course_id' => $course->id,
+            'status' => 'active',
+            'enrolled_at' => now(),
+        ]);
+
+        $this->actingAs($student)
+            ->withHeader('Range', 'bytes=0-1023')
+            ->get("/api/learning/lessons/{$lesson->id}/video")
+            ->assertStatus(206)
+            ->assertHeader('content-range', 'bytes 0-1023/4096');
+    }
+
+    private function attachReadyVideo(Lesson $lesson): void
+    {
+        $contents = str_repeat('0', 4096);
+        $path = "courses/{$lesson->section->course_id}/lessons/{$lesson->id}/videos/lesson.mp4";
+        Storage::disk('course_media')->put($path, $contents);
+        $lesson->video()->create([
+            'disk' => 'course_media',
+            'path' => $path,
+            'original_name' => 'lesson.mp4',
+            'mime_type' => 'video/mp4',
+            'file_size' => strlen($contents),
+            'checksum' => hash('sha256', $contents),
+            'provider' => 'local',
+            'processing_status' => 'ready',
+            'processed_at' => now(),
+        ]);
     }
 
     private function courseWithLesson(string $type, bool $published = false): array

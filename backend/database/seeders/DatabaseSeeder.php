@@ -17,6 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolePermissionSeeder::class);
 
+        if (app()->environment('local')) {
+            $this->call(DemoCatalogSeeder::class);
+        }
+
         // User::factory(10)->create();
 
         if (app()->environment('local')) {

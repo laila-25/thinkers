@@ -15,7 +15,7 @@ class QuizPolicy
     public function view(User $user, Quiz $quiz): bool
     {
         $quiz->loadMissing('lesson.section.course');
-        if ($user->hasRole('instructor')) {
+        if ($user->isApprovedInstructor()) {
             return $quiz->lesson->section->course->instructor_id === $user->id;
         }
 

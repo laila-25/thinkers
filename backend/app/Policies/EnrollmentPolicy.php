@@ -22,6 +22,11 @@ class EnrollmentPolicy
         return $this->view($user, $enrollment) && $enrollment->status === 'active';
     }
 
+    public function updateInteraction(User $user, Enrollment $enrollment): bool
+    {
+        return $this->view($user, $enrollment) && in_array($enrollment->status, ['active', 'completed'], true);
+    }
+
     public function cancel(User $user, Enrollment $enrollment): bool
     {
         return $this->view($user, $enrollment) && $enrollment->status === 'active';

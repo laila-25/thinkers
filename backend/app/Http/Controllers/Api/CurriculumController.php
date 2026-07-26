@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ReorderCurriculumRequest;
 use App\Http\Resources\LessonResource;
 use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\Lesson;
+use App\Services\CurriculumOrderingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -49,6 +51,13 @@ class CurriculumController extends Controller
         return response()->json(status: 204);
     }
 
+    public function reorderSections(ReorderCurriculumRequest $request, Course $course, CurriculumOrderingService $ordering): JsonResponse
+    {
+        $ordering->sections($course, $request->validated('ids'));
+
+        return response()->json(status: 204);
+    }
+
     public function storeLesson(Request $request, CourseSection $section): LessonResource
     {
         Gate::authorize('update', $section->course);
@@ -74,6 +83,13 @@ class CurriculumController extends Controller
     {
         Gate::authorize('update', $lesson->section->course);
         $lesson->delete();
+
+        return response()->json(status: 204);
+    }
+
+    public function reorderLessons(ReorderCurriculumRequest $request, CourseSection $section, CurriculumOrderingService $ordering): JsonResponse
+    {
+        $ordering->lessons($section, $request->validated('ids'));
 
         return response()->json(status: 204);
     }

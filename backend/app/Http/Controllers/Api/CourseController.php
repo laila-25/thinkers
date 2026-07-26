@@ -12,12 +12,13 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CourseController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        abort_unless($request->user()->hasAnyRole(['instructor', 'admin']), 403);
+        abort_unless($request->user()->hasRole('admin') || $request->user()->isApprovedInstructor(), 403);
         $query = Course::query()->with(['instructor:id,name', 'category']);
         if (! $request->user()->hasRole('admin')) {
             $query->where('instructor_id', $request->user()->id);
@@ -63,6 +64,23 @@ class CourseController extends Controller
     public function submit(Course $course): CourseResource
     {
         Gate::authorize('submit', $course);
+        $course->loadCount(['sections', 'lessons']);
+        $errors = [];
+        if (! $course->thumbnail) {
+            $errors['thumbnail'][] = 'A course thumbnail is required.';
+        }
+        if (! $course->sections_count) {
+            $errors['sections'][] = 'At least one section is required.';
+        }
+        if (! $course->lessons_count) {
+            $errors['lessons'][] = 'At least one lesson is required.';
+        }
+        if (! $course->title || ! $course->short_description || ! $course->description) {
+            $errors['course'][] = 'Complete all required course information.';
+        }
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
         $course->update(['status' => 'pending_review', 'rejection_reason' => null]);
 
         return new CourseResource($course->fresh(['instructor:id,name', 'category']));

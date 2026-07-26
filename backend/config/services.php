@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-5.6-terra'),
+        'timeout' => env('OPENAI_TIMEOUT', 45),
+        'connect_timeout' => env('OPENAI_CONNECT_TIMEOUT', 10),
+        'max_attempts' => env('OPENAI_MAX_ATTEMPTS', 3),
+        'retry_base_ms' => env('OPENAI_RETRY_BASE_MS', 250),
+        'retry_max_ms' => env('OPENAI_RETRY_MAX_MS', 2000),
+        'max_output_tokens' => [
+            'chat' => env('OPENAI_CHAT_MAX_OUTPUT_TOKENS', 900),
+            'summary' => env('OPENAI_SUMMARY_MAX_OUTPUT_TOKENS', 700),
+            'quiz' => env('OPENAI_QUIZ_MAX_OUTPUT_TOKENS', 1800),
+        ],
+    ],
+
 ];

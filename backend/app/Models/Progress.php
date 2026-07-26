@@ -12,6 +12,7 @@ class Progress extends Model
     protected $fillable = [
         'enrollment_id', 'lesson_id', 'status', 'completion_percentage',
         'playback_position', 'started_at', 'last_accessed_at', 'completed_at',
+        'notes', 'is_bookmarked', 'is_important',
     ];
 
     protected function casts(): array
@@ -20,6 +21,8 @@ class Progress extends Model
             'started_at' => 'datetime',
             'last_accessed_at' => 'datetime',
             'completed_at' => 'datetime',
+            'is_bookmarked' => 'boolean',
+            'is_important' => 'boolean',
         ];
     }
 
