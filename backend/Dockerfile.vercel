@@ -3,7 +3,8 @@ FROM composer:2.8 AS composer
 FROM php:8.3-apache-bookworm
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
-    COMPOSER_ALLOW_SUPERUSER=1
+    COMPOSER_ALLOW_SUPERUSER=1 \
+    PORT=80
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -63,8 +64,21 @@ RUN mkdir -p \
         --no-scripts \
     && php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R ug+rwX storage bootstrap/cache
+    && chmod -R ug+rwX storage bootstrap/cache \
+    && rm -rf \
+        storage/app \
+        storage/framework/cache \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && ln -s /tmp/thinkers/storage/app storage/app \
+    && ln -s /tmp/thinkers/storage/framework/cache storage/framework/cache \
+    && ln -s /tmp/thinkers/storage/framework/sessions storage/framework/sessions \
+    && ln -s /tmp/thinkers/storage/framework/views storage/framework/views \
+    && ln -s /tmp/thinkers/storage/logs storage/logs \
+    && ln -s /tmp/thinkers/bootstrap/cache bootstrap/cache
 
-EXPOSE 10000
+EXPOSE 80
 
-CMD ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && php artisan config:cache && php artisan view:cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache && sed -ri \"s/^Listen [0-9]+$/Listen ${PORT:-10000}/\" /etc/apache2/ports.conf && sed -ri \"s/<VirtualHost \\*:[0-9]+>/<VirtualHost *:${PORT:-10000}>/\" /etc/apache2/sites-available/000-default.conf && exec apache2-foreground"]
+CMD ["sh", "-c", "mkdir -p /tmp/thinkers/storage/app/private/course-media /tmp/thinkers/storage/app/private/certificates /tmp/thinkers/storage/app/public /tmp/thinkers/storage/framework/cache/data /tmp/thinkers/storage/framework/sessions /tmp/thinkers/storage/framework/views /tmp/thinkers/storage/logs /tmp/thinkers/bootstrap/cache && chown -R www-data:www-data /tmp/thinkers && chmod -R ug+rwX /tmp/thinkers && php artisan config:cache && php artisan view:cache && sed -ri \"s/^Listen [0-9]+$/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && sed -ri \"s/<VirtualHost \\*:[0-9]+>/<VirtualHost *:${PORT:-80}>/\" /etc/apache2/sites-available/000-default.conf && exec apache2-foreground"]

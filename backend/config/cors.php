@@ -1,20 +1,24 @@
 <?php
 
+$frontendUrl = rtrim((string) env('FRONTEND_URL', 'http://localhost:5173'), '/');
+
+$allowedOrigins = array_values(array_filter(array_map(
+    static fn (string $origin): string => rtrim(trim($origin), '/'),
+    explode(',', (string) env('CORS_ALLOWED_ORIGINS', $frontendUrl))
+)));
+
+$allowedOriginPatterns = array_values(array_filter(array_map(
+    static fn (string $pattern): string => trim($pattern),
+    explode(',', (string) env('CORS_ALLOWED_ORIGIN_PATTERNS', ''))
+)));
+
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => array_values(array_unique([
-        env('FRONTEND_URL', 'http://localhost:5173'),
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://127.0.0.1:5173',
-        'http://127.0.0.1:5174',
-    ])),
-    'allowed_origins_patterns' => [
-        '#^https?://(?:localhost|127\.0\.0\.1)(?::\d+)?$#',
-    ],
+    'allowed_origins' => array_values(array_unique($allowedOrigins)),
+    'allowed_origins_patterns' => $allowedOriginPatterns,
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
-    'max_age' => 0,
+    'max_age' => (int) env('CORS_MAX_AGE', 600),
     'supports_credentials' => true,
 ];

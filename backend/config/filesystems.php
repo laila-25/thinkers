@@ -1,5 +1,16 @@
 <?php
 
+$s3Configuration = [
+    'driver' => 's3',
+    'key' => env('AWS_ACCESS_KEY_ID'),
+    'secret' => env('AWS_SECRET_ACCESS_KEY'),
+    'region' => env('AWS_DEFAULT_REGION'),
+    'bucket' => env('AWS_BUCKET'),
+    'url' => env('AWS_URL'),
+    'endpoint' => env('AWS_ENDPOINT'),
+    'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+];
+
 return [
 
     /*
@@ -38,43 +49,57 @@ return [
             'report' => false,
         ],
 
-        'course_media' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private/course-media'),
-            'visibility' => 'private',
-            'throw' => true,
-            'report' => true,
-        ],
+        'course_media' => env('COURSE_MEDIA_FILESYSTEM_DRIVER', 'local') === 's3'
+            ? array_merge($s3Configuration, [
+                'root' => env('COURSE_MEDIA_AWS_ROOT', 'course-media'),
+                'visibility' => 'private',
+                'throw' => true,
+                'report' => true,
+            ])
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/private/course-media'),
+                'visibility' => 'private',
+                'throw' => true,
+                'report' => true,
+            ],
 
-        'certificates' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private/certificates'),
-            'visibility' => 'private',
-            'throw' => true,
-            'report' => true,
-        ],
+        'certificates' => env('CERTIFICATE_FILESYSTEM_DRIVER', 'local') === 's3'
+            ? array_merge($s3Configuration, [
+                'root' => env('CERTIFICATE_AWS_ROOT', 'certificates'),
+                'visibility' => 'private',
+                'throw' => true,
+                'report' => true,
+            ])
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/private/certificates'),
+                'visibility' => 'private',
+                'throw' => true,
+                'report' => true,
+            ],
 
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'visibility' => 'public',
+        'public' => env('PUBLIC_FILESYSTEM_DRIVER', 'local') === 's3'
+            ? array_merge($s3Configuration, [
+                'root' => env('PUBLIC_AWS_ROOT', 'public'),
+                'url' => env('PUBLIC_AWS_URL', env('AWS_URL')),
+                'visibility' => 'public',
+                'throw' => false,
+                'report' => false,
+            ])
+            : [
+                'driver' => 'local',
+                'root' => storage_path('app/public'),
+                'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+                'visibility' => 'public',
+                'throw' => false,
+                'report' => false,
+            ],
+
+        's3' => array_merge($s3Configuration, [
             'throw' => false,
             'report' => false,
-        ],
-
-        's3' => [
-            'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
-            'report' => false,
-        ],
+        ]),
 
     ],
 
