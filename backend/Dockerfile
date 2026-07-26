@@ -50,15 +50,21 @@ RUN composer install \
 
 COPY . .
 
-RUN composer dump-autoload \
+RUN mkdir -p \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && composer dump-autoload \
         --no-dev \
         --classmap-authoritative \
         --no-interaction \
         --no-scripts \
     && php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R ug+rwx storage bootstrap/cache
+    && chmod -R ug+rwX storage bootstrap/cache
 
 EXPOSE 10000
 
-CMD ["sh", "-c", "php artisan config:cache && php artisan view:cache && sed -ri \"s/^Listen [0-9]+$/Listen ${PORT:-10000}/\" /etc/apache2/ports.conf && sed -ri \"s/<VirtualHost \\*:[0-9]+>/<VirtualHost *:${PORT:-10000}>/\" /etc/apache2/sites-available/000-default.conf && exec apache2-foreground"]
+CMD ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && php artisan config:cache && php artisan view:cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache && sed -ri \"s/^Listen [0-9]+$/Listen ${PORT:-10000}/\" /etc/apache2/ports.conf && sed -ri \"s/<VirtualHost \\*:[0-9]+>/<VirtualHost *:${PORT:-10000}>/\" /etc/apache2/sites-available/000-default.conf && exec apache2-foreground"]
