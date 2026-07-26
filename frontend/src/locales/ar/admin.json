@@ -1,0 +1,11 @@
+{
+  "nav":{"dashboard":"الرئيسية","users":"المستخدمون","courses":"الدورات","instructors":"طلبات المدرّسين","categories":"التصنيفات","ai":"استخدام الذكاء الاصطناعي","reports":"التقارير","revenue":"الإيرادات","orders":"الطلبات","activity":"سجل التدقيق","settings":"الإعدادات"},
+  "workspace":"مساحة الإدارة","administrator":"مسؤول النظام","search":"البحث في مساحة العمل","notifications":"الإشعارات","noNotifications":"لا توجد تنبيهات تشغيلية.","viewPlatform":"عرض المنصة","signOut":"تسجيل الخروج",
+  "notification":{"instructor":"{{count}} طلبات مدرّسين تحتاج للمراجعة.","course":"{{count}} دورات تحتاج للإشراف.","order":"{{count}} طلبات فاشلة تحتاج للمتابعة."},
+  "revenue":{"title":"تحليلات الإيرادات","description":"راقب مبيعات المنصة وتوزيع الإيرادات.","totalSales":"إجمالي المبيعات","gross":"إجمالي الإيرادات","platform":"إيرادات المنصة","instructors":"أرباح المدرّسين","monthly":"الإيرادات الشهرية","empty":"ستظهر الإيرادات بعد اكتمال المبيعات."},
+  "orders":{"title":"مراقبة الطلبات","description":"راقب حالات طلبات المنصة دون تعديل سجلات الدفع.","filter":"تصفية الطلبات","all":"جميع حالات الطلبات","order":"الطلب","customer":"العميل","course":"الدورة","amount":"المبلغ","status":"الحالة","date":"تاريخ الإنشاء","empty":"لا توجد طلبات مطابقة."},
+  "activity":{"title":"سجل التدقيق","description":"خط زمني تشغيلي آمن لإجراءات الإدارة الحساسة.","refresh":"تحديث السجل","system":"النظام","empty":"لم يتم تسجيل نشاط إداري بعد."},
+  "status":{"pending":"معلق","paid":"مدفوع","failed":"فاشل","refunded":"مسترد"},
+  "actions":{"course.approved":"تمت الموافقة على الدورة","course.rejected":"تم رفض الدورة","course.archived":"تمت أرشفة الدورة","instructor.approved":"تمت الموافقة على المدرّس","instructor.rejected":"تم رفض المدرّس","instructor.pending":"أعيد طلب المدرّس إلى الانتظار","admin.granted":"تم منح صلاحية الإدارة","admin.revoked":"تم إلغاء صلاحية الإدارة"},
+  "pagination":"صفحة {{current}} من {{last}}","previous":"السابق","next":"التالي"
+}

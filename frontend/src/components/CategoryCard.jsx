@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { ArrowRight, BriefcaseBusiness, Code2, Languages, Palette, Sparkles, Shapes } from 'lucide-react';
-import { m, useReducedMotion } from 'framer-motion';
+import { motion as m, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 const icons = [Code2, BriefcaseBusiness, Palette, Languages, Shapes, Sparkles];
 
 export default function CategoryCard({ category, index = 0 }) {
+  const { t } = useTranslation('courses');
   const [active, setActive] = useState(false);
   const reduceMotion = useReducedMotion();
   const Icon = icons[index % icons.length];
-  const description = category.description || `Explore reviewed ${category.name.toLowerCase()} courses and build practical skills.`;
+  const description = category.description || t('categories.fallback', { name: category.name });
   const state = active ? 'active' : 'rest';
 
   return (
@@ -48,7 +50,7 @@ export default function CategoryCard({ category, index = 0 }) {
         </m.div>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:hidden">{description}</p>
         <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-slate-600 transition-colors group-hover:text-slate-950 group-focus-visible:text-slate-950">
-          Explore courses
+          {t('categories.explore')}
           <m.span variants={{ rest: { x: 0 }, active: { x: reduceMotion ? 0 : 5 } }}><ArrowRight className="h-4 w-4" /></m.span>
         </span>
       </Link>

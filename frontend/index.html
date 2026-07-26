@@ -5,12 +5,23 @@
     <script>
       (() => {
         const saved = localStorage.getItem('thinkers-theme');
-        const theme = saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const preference = saved === 'light' || saved === 'dark' ? saved : 'system';
+        const theme = preference === 'system'
+          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : preference;
+        const savedLanguage = localStorage.getItem('thinkers-language');
+        const language = savedLanguage === 'ar' || savedLanguage === 'en'
+          ? savedLanguage
+          : (navigator.language || '').toLowerCase().startsWith('ar') ? 'ar' : 'en';
         document.documentElement.dataset.theme = theme;
         document.documentElement.style.colorScheme = theme;
+        document.documentElement.lang = language;
+        document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
       })();
     </script>
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/images/thinkers-hero-learning.webp" as="image" type="image/webp" fetchpriority="high" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thinkers</title>
   </head>

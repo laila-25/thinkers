@@ -1,488 +1,142 @@
-import { useEffect, useState } from "react";
-import {
-  ArrowRight,
-  BarChart3,
-  BookOpen,
-  Check,
-  CirclePlay,
-  Globe2,
-  MessageCircle,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  UsersRound,
-} from "lucide-react";
-import { Link } from "react-router";
-import { m, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import api from "../api/client";
-import Button from "../components/Button";
-import CourseCard from "../components/CourseCard";
-import CategoryCard from "../components/CategoryCard";
+import { useEffect, useState } from 'react';
+import { ArrowRight, Award, BarChart3, BookOpenCheck, Bot, Check, CheckCircle2, CirclePlay, Compass, Flame, Layers3, Play, ShieldCheck, Sparkles, Trophy, UsersRound } from 'lucide-react';
+import { Link } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import Button from '../components/Button';
+import CourseCard from '../components/CourseCard';
+import FeatureCard from '../components/FeatureCard';
+import SectionTitle from '../components/SectionTitle';
+import PageBackground from '../components/PageBackground';
 
-const benefits = [
-  [
-    ShieldCheck,
-    "Quality reviewed",
-    "Courses follow a clear approval workflow before they reach learners.",
-  ],
-  [
-    CirclePlay,
-    "Learn by doing",
-    "Structured lessons, resources, progress tracking, and assessments in one place.",
-  ],
-  [
-    UsersRound,
-    "Expert-led learning",
-    "Learn from approved instructors with practical, focused curricula.",
-  ],
-];
-
-const heroItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] } },
-};
+const whyIcons = [ShieldCheck, UsersRound, BarChart3];
+const featureIcons = [Bot, Layers3, CirclePlay, Trophy, Award, BarChart3];
+const stepIcons = [Compass, CirclePlay, BarChart3];
+const HERO_BACKGROUND = '/images/thinkers-hero-learning.webp';
 
 export default function Landing() {
-  const reduceMotion = useReducedMotion();
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const smoothX = useSpring(pointerX, { stiffness: 75, damping: 22, mass: 0.55 });
-  const smoothY = useSpring(pointerY, { stiffness: 75, damping: 22, mass: 0.55 });
-  const contentX = useTransform(smoothX, value => value * -5);
-  const contentY = useTransform(smoothY, value => value * -3);
-  const artX = useTransform(smoothX, value => value * 14);
-  const artY = useTransform(smoothY, value => value * 9);
-  const glowX = useTransform(smoothX, value => value * 150);
-  const glowY = useTransform(smoothY, value => value * 90);
+  const { t } = useTranslation();
+  const [courses, setCourses] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [courseCount, setCourseCount] = useState(0);
 
-  const trackPointer = event => {
-    if (reduceMotion || event.pointerType !== 'mouse') return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    pointerX.set((event.clientX - bounds.left) / bounds.width - 0.5);
-    pointerY.set((event.clientY - bounds.top) / bounds.height - 0.5);
-  };
-
-  const resetPointer = () => {
-    pointerX.set(0);
-    pointerY.set(0);
-  };
-  const [courses, setCourses] = useState([]),
-    [categories, setCategories] = useState([]);
   useEffect(() => {
-    api
-      .get("/api/courses", { params: { per_page: 3 } })
-      .then((r) => setCourses(r.data.data.slice(0, 3)))
-      .catch(() => {});
-    api
-      .get("/api/categories")
-      .then((r) => setCategories(r.data.data.slice(0, 6)))
-      .catch(() => {});
+    let active = true;
+    const load = () => fetch('/api/courses?per_page=3', { headers: { Accept: 'application/json' } })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Course request failed')))
+      .then(data => { if (active) { setCourses((data.data || []).slice(0, 3)); setCourseCount(data.meta?.total || data.data?.length || 0); } })
+      .catch(() => {})
+      .finally(() => { if (active) setStatus('ready'); });
+    const idleId = 'requestIdleCallback' in window ? window.requestIdleCallback(load, { timeout: 1200 }) : window.setTimeout(load, 300);
+    return () => { active = false; if ('cancelIdleCallback' in window) window.cancelIdleCallback(idleId); else window.clearTimeout(idleId); };
   }, []);
+
   return (
-    <div className="overflow-hidden bg-white">
-      <section className="relative page-section pb-20 pt-28 sm:pt-32 lg:pb-28" onPointerMove={trackPointer} onPointerLeave={resetPointer}>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_28%,rgba(245,197,66,0.20),transparent_26%),linear-gradient(180deg,rgba(255,251,235,0.72),rgba(255,255,255,0))]" />
-        <m.div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-[62%] top-[38%] hidden h-72 w-72 -ml-36 -mt-36 rounded-full bg-amber-300/15 blur-3xl lg:block"
-          style={reduceMotion ? undefined : { x: glowX, y: glowY }}
-        />
-        <div className="section-shell relative grid items-center gap-14 lg:grid-cols-[0.88fr_1.12fr] xl:gap-20">
-          <m.div
-            className="max-w-2xl"
-            style={reduceMotion ? undefined : { x: contentX, y: contentY }}
-            initial={reduceMotion ? false : "hidden"}
-            animate="visible"
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.11, delayChildren: 0.12 } } }}
-          >
-            <m.span variants={heroItem} className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50/70 px-4 py-2 text-sm font-semibold text-[#0B132B]">
-              <Sparkles className="h-4 w-4 text-amber-500" /> Learn with
-              purpose. Grow with confidence.
-            </m.span>
-            <m.h1 variants={heroItem} className="mt-7 text-5xl font-bold leading-[1.04] tracking-[-0.04em] text-[#0B132B] sm:text-6xl lg:text-[4.25rem]">
-              Learning that turns ambition into{" "}
-              <span className="relative whitespace-nowrap">
-                real progress.
-                <span className="absolute -bottom-1 left-0 h-2 w-full -rotate-1 rounded-full bg-[#F5C542]/45" />
-              </span>
-            </m.h1>
-            <m.p variants={heroItem} className="mt-7 max-w-xl text-lg leading-8 text-slate-600">
-              Build in-demand skills with expert-led courses, structured
-              learning paths, and progress you can measure from day one.
-            </m.p>
-            <m.div variants={heroItem} className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <m.div
-                initial={reduceMotion ? false : { scale: 1 }}
-                animate={reduceMotion ? undefined : { scale: [1, 1.025, 1], boxShadow: ["0 0 0 rgba(245,197,66,0)", "0 0 24px rgba(245,197,66,0.28)", "0 0 0 rgba(245,197,66,0)"] }}
-                transition={{ delay: 1.15, duration: 1.25, ease: "easeInOut" }}
-                whileHover={reduceMotion ? undefined : { scale: 1.035, boxShadow: "0 0 26px rgba(245,197,66,0.32)" }}
-                className="rounded-xl"
-              >
-                <Link to="/courses" className="group block">
-                  <Button size="lg" className="w-full gap-2 px-7 sm:w-auto">
-                    Explore Courses <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Button>
-                </Link>
-              </m.div>
-              <Link to="/register">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="w-full px-7 sm:w-auto"
-                >
-                  Become an Instructor
-                </Button>
-              </Link>
-            </m.div>
-            <m.div variants={heroItem} className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-slate-600">
-              <span className="flex items-center gap-2">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-amber-100">
-                  <Check className="h-3.5 w-3.5 text-amber-700" />
-                </span>
-                Free courses available
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-amber-100">
-                  <Check className="h-3.5 w-3.5 text-amber-700" />
-                </span>
-                Track every milestone
-              </span>
-            </m.div>
-          </m.div>
-          <m.div style={reduceMotion ? undefined : { x: artX, y: artY }}>
-            <HeroIllustration />
-          </m.div>
-        </div>
-      </section>
+    <PageBackground variant="landing" className="overflow-hidden">
+      <Hero />
 
-      <FeaturesSection />
-      <AboutSection />
+      <SocialProof courseCount={courseCount} />
 
-      <section id="categories" className="bg-slate-50 page-section">
+      <section className="deferred-section page-section border-y border-white/60 bg-white/55 backdrop-blur-[2px] dark:border-slate-700/60 dark:bg-slate-900/45">
         <div className="section-shell">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="section-kicker">Explore topics</p>
-              <h2 className="section-title">Popular categories</h2>
-            </div>
-            <Link
-              to="/courses"
-              className="hidden font-semibold text-slate-700 sm:block"
-            >
-              Browse all <ArrowRight className="inline h-4 w-4" />
-            </Link>
-          </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.length ? (
-              categories.map((category, index) => (
-                <CategoryCard key={category.id} category={category} index={index} />
-              ))
-            ) : (
-              <p className="text-slate-500">
-                Categories will appear here when available.
-              </p>
-            )}
-          </div>
+          <SectionTitle eyebrow={t('landing.why.eyebrow')} title={t('landing.why.title')} description={t('landing.why.description')} align="center" />
+          <div className="mt-12 grid gap-5 md:grid-cols-3">{t('landing.why.items', { returnObjects: true }).map((item, index) => <FeatureCard key={item.title} icon={whyIcons[index]} title={item.title} description={item.description} index={index} />)}</div>
         </div>
       </section>
 
-      <section className="page-section">
+      <section className="deferred-section page-section border-y border-amber-200/60 bg-amber-50/45 backdrop-blur-[2px] dark:border-amber-400/15 dark:bg-amber-400/5">
         <div className="section-shell">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="section-kicker">Start learning</p>
-              <h2 className="section-title">Featured courses</h2>
-            </div>
-            <Link
-              to="/courses"
-              className="hidden font-semibold text-slate-700 sm:block"
-            >
-              View all courses <ArrowRight className="inline h-4 w-4" />
-            </Link>
-          </div>
-          <div className="mt-10 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {courses.length ? (
-              courses.map((course, index) => (
-                <CourseCard key={course.id} course={course} index={index} />
-              ))
-            ) : (
-              <div className="col-span-full rounded-2xl bg-slate-50 p-10 text-center text-slate-500">
-                Published courses will appear after approval.
-              </div>
-            )}
-          </div>
+          <SectionTitle eyebrow={t('landing.features.eyebrow')} title={t('landing.features.title')} description={t('landing.features.description')} align="center" />
+          <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{t('landing.features.items', { returnObjects: true }).map((item, index) => <FeatureShowcase key={item.title} icon={featureIcons[index]} title={item.title} description={item.description} index={index} />)}</div>
         </div>
       </section>
 
-      <section className="page-section">
-        <div className="section-shell text-center">
-          <p className="section-kicker">How it works</p>
-          <h2 className="section-title">
-            A simple path from interest to progress.
-          </h2>
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
-            {[
-              [
-                "01",
-                "Find your course",
-                "Browse reviewed courses and choose a learning goal.",
-              ],
-              [
-                "02",
-                "Learn step by step",
-                "Follow focused sections, lessons, and resources.",
-              ],
-              [
-                "03",
-                "Prove your progress",
-                "Complete assessments and watch your progress grow.",
-              ],
-            ].map(([n, title, text]) => (
-              <div
-                key={n}
-                className="relative rounded-2xl bg-slate-50 p-8 text-left"
-              >
-                <span className="text-4xl font-bold text-amber-400">{n}</span>
-                <h3 className="mt-5 text-xl font-bold">{title}</h3>
-                <p className="mt-3 leading-7 text-slate-600">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-amber-50 page-section">
-        <div className="section-shell grid items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="section-kicker">For instructors</p>
-            <h2 className="section-title">
-              Turn your expertise into structured learning.
-            </h2>
-            <p className="mt-5 max-w-xl leading-7 text-slate-600">
-              Build sections, lessons, videos, resources, and assessments with a
-              professional workflow and clear moderation.
-            </p>
-            <Link to="/register" className="mt-8 inline-block">
-              <Button size="lg">Start teaching</Button>
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[
-              [BookOpen, "Flexible course builder"],
-              [BarChart3, "Enrollment statistics"],
-              [MessageCircle, "Clear review workflow"],
-              [Globe2, "Reach learners anywhere"],
-            ].map(([Icon, text]) => (
-              <div
-                key={text}
-                className="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm"
-              >
-                <Icon className="h-6 w-6 text-amber-600" />
-                <strong>{text}</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="page-section">
+      <section className="deferred-section page-section bg-white/35 backdrop-blur-[1px] dark:bg-slate-950/15">
         <div className="section-shell">
-          <div className="text-center">
-            <p className="section-kicker">Learner stories</p>
-            <h2 className="section-title">Built for meaningful progress.</h2>
-          </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              [
-                "“The structure keeps me focused without feeling overwhelmed.”",
-                "Maya R.",
-                "Product learner",
-              ],
-              [
-                "“I can see exactly where I left off and what comes next.”",
-                "Omar K.",
-                "Software learner",
-              ],
-              [
-                "“The course builder makes my material feel organized and professional.”",
-                "Lina A.",
-                "Instructor",
-              ],
-            ].map(([quote, name, role]) => (
-              <figure
-                key={name}
-                className="rounded-2xl border border-slate-200 p-7"
-              >
-                <div className="flex gap-1 text-amber-500">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
-                  ))}
-                </div>
-                <blockquote className="mt-5 leading-7 text-slate-700">
-                  {quote}
-                </blockquote>
-                <figcaption className="mt-6">
-                  <strong>{name}</strong>
-                  <span className="block text-sm text-slate-500">{role}</span>
-                </figcaption>
-              </figure>
-            ))}
+          <SectionTitle eyebrow={t('landing.steps.eyebrow')} title={t('landing.steps.title')} align="center" />
+          <div className="relative mt-14 grid gap-5 md:grid-cols-3">
+            <div className="absolute left-[16%] right-[16%] top-10 hidden h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent md:block" />
+            {t('landing.steps.items', { returnObjects: true }).map((item, index) => <Step key={item.title} number={String(index + 1).padStart(2, '0')} icon={stepIcons[index]} title={item.title} description={item.description} index={index} label={t('landing.steps.label', { number: String(index + 1).padStart(2, '0') })} />)}
           </div>
         </div>
       </section>
 
-      <section className="bg-slate-50 page-section">
-        <div className="mx-auto max-w-3xl px-4">
-          <div className="text-center">
-            <p className="section-kicker">FAQ</p>
-            <h2 className="section-title">Questions, answered.</h2>
-          </div>
-          <div className="mt-10 space-y-3">
-            {[
-              [
-                "Can I start for free?",
-                "Yes. Published free courses can be enrolled in directly.",
-              ],
-              [
-                "How are courses published?",
-                "Instructor courses go through an admin review and approval workflow.",
-              ],
-              [
-                "Can I track my learning?",
-                "Yes. Lesson progress, quiz results, and overall completion are tracked.",
-              ],
-              [
-                "Can I teach on Thinkers?",
-                "Create an account, apply as an instructor, and wait for admin approval.",
-              ],
-            ].map(([q, a]) => (
-              <details
-                key={q}
-                className="group rounded-2xl border border-slate-200 bg-white p-5"
-              >
-                <summary className="cursor-pointer list-none font-semibold text-slate-900">
-                  {q}
-                  <span className="float-right text-xl">+</span>
-                </summary>
-                <p className="mt-4 leading-7 text-slate-600">{a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" className="page-section">
+      <section className="deferred-section page-section border-y border-white/60 bg-slate-50/55 backdrop-blur-[2px] dark:border-slate-700/60 dark:bg-slate-900/45">
         <div className="section-shell">
-          <div className="rounded-3xl bg-slate-950 px-6 py-14 text-center text-white sm:px-12">
-            <h2 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">
-              Ready to start learning?
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-slate-300">
-              Explore the catalog or get in touch with the Thinkers team.
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link to="/courses">
-                <Button size="lg">Explore courses</Button>
-              </Link>
-              <a href="mailto:hello@thinkers.local">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  Contact us
-                </Button>
-              </a>
-            </div>
-          </div>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"><SectionTitle eyebrow={t('landing.popular.eyebrow')} title={t('landing.popular.title')} description={t('landing.popular.description')} /><Link to="/courses" className="group inline-flex shrink-0 items-center gap-2 font-bold text-[#0B132B]">{t('landing.popular.viewAll')} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" /></Link></div>
+          {status === 'loading' ? <CourseSkeletons label={t('landing.popular.loading')} /> : courses.length ? <div className="mt-10 grid gap-7 md:grid-cols-2 lg:grid-cols-3">{courses.map((course, index) => <CourseCard key={course.id} course={course} index={index} />)}</div> : <div className="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">{t('landing.popular.empty')}</div>}
         </div>
       </section>
+
+      <CallToAction />
+    </PageBackground>
+  );
+}
+
+function Hero() {
+  const { t } = useTranslation();
+  return (
+    <section className="relative flex min-h-[100svh] items-center overflow-hidden border-b border-slate-800 bg-slate-950 py-28 sm:py-32 lg:py-36">
+      <img src={HERO_BACKGROUND} alt="" aria-hidden="true" width="1824" height="864" decoding="async" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-center" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.58)_0%,rgba(2,6,23,0.52)_48%,rgba(2,6,23,0.44)_100%)]" />
+      <div className="section-shell relative grid items-center gap-12 lg:grid-cols-[1fr_0.9fr]">
+        <div className="max-w-3xl">
+          <HeroItem><span className="inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-amber-300 shadow-sm backdrop-blur-md"><Sparkles className="h-4 w-4" /> {t('landing.hero.badge')}</span></HeroItem>
+          <HeroItem><h1 className="mt-7 text-5xl font-extrabold leading-[1.02] tracking-[-0.055em] text-white [text-shadow:0_3px_24px_rgba(0,0,0,0.35)] sm:text-6xl lg:text-7xl xl:text-[5rem]">{t('landing.hero.title')}<br/><span className="relative text-white"><span className="relative z-10">{t('landing.hero.titleAccent')}</span><span className="absolute inset-x-0 bottom-1 h-3 -rotate-1 rounded-full bg-[#F5C542]/70" /></span></h1></HeroItem>
+          <HeroItem><p className="mt-7 max-w-2xl text-lg leading-8 text-slate-200 sm:text-xl">{t('landing.hero.description')}</p></HeroItem>
+          <HeroItem><div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link to="/courses" className="transition-transform duration-300 motion-safe:hover:-translate-y-0.5"><Button variant="accent" size="lg" className="w-full sm:w-auto">{t('landing.hero.explore')} <ArrowRight className="h-5 w-5 rtl:rotate-180" /></Button></Link><Link to="/about" className="transition-transform duration-300 motion-safe:hover:-translate-y-0.5"><Button variant="secondary" size="lg" className="w-full border-white/40 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 sm:w-auto">{t('landing.hero.why')}</Button></Link></div></HeroItem>
+          <HeroItem><div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-200">{t('landing.hero.points', { returnObjects: true }).map(item => <span key={item} className="flex items-center gap-2"><span className="grid h-5 w-5 place-items-center rounded-full bg-amber-300/20"><Check className="h-3.5 w-3.5 text-amber-300" /></span>{item}</span>)}</div></HeroItem>
+        </div>
+        <ProductPreview />
+      </div>
+    </section>
+  );
+}
+
+function HeroItem({ children }) {
+  return <div>{children}</div>;
+}
+
+function ProductPreview() {
+  const { t } = useTranslation();
+  return <div className="landing-preview-enter relative mx-auto w-full max-w-[36rem] lg:translate-x-3">
+    <div className="absolute -inset-10 rounded-full bg-amber-300/20 blur-3xl"/>
+    <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-slate-950/65 p-3 shadow-[0_35px_100px_-30px_rgba(0,0,0,.85)] backdrop-blur-xl sm:p-4">
+      <div className="flex items-center gap-2 border-b border-white/10 px-2 pb-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-auto text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Thinkers learning space</span></div>
+      <div className="mt-3 overflow-hidden rounded-2xl border border-white/10 bg-[#101a2c]">
+        <div className="relative aspect-[16/9]"><img src={HERO_BACKGROUND} alt="" width="640" height="360" decoding="async" className="h-full w-full object-cover opacity-70"/><div className="absolute inset-0 grid place-items-center bg-slate-950/25"><span className="grid h-14 w-14 place-items-center rounded-full border border-white/30 bg-white/15 text-white shadow-xl backdrop-blur"><Play className="h-6 w-6 fill-current"/></span></div><span className="absolute bottom-3 left-3 rounded-lg bg-slate-950/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">{t('landing.preview.lesson')}</span></div>
+        <div className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center"><div><p className="text-sm font-bold text-white">{t('landing.preview.course')}</p><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full w-[72%] rounded-full bg-[#F5C542]"/></div></div><span className="text-xs font-bold text-amber-300">72% {t('landing.preview.complete')}</span></div>
+      </div>
     </div>
-  );
+    <div className="landing-float-up absolute -left-3 top-[38%] w-48 rounded-2xl border border-white/20 bg-white/95 p-3.5 shadow-2xl backdrop-blur dark:bg-slate-900/95 sm:-left-12 sm:w-56"><div className="flex gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#F5C542] text-slate-950"><Bot className="h-5 w-5"/></span><div><p className="text-xs font-extrabold text-slate-950 dark:text-white">{t('landing.preview.ai')}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{t('landing.preview.aiText')}</p></div></div></div>
+    <div className="landing-float-down absolute -bottom-8 right-1 w-52 rounded-2xl border border-white/20 bg-white/95 p-4 shadow-2xl backdrop-blur dark:bg-slate-900/95 sm:-right-8"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"><Award className="h-5 w-5"/></span><div><p className="text-xs font-extrabold text-slate-950 dark:text-white">{t('landing.preview.certificate')}</p><p className="mt-0.5 text-[10px] text-emerald-700 dark:text-emerald-300">{t('landing.preview.verified')}</p></div></div></div>
+    <div className="absolute -right-2 top-10 rounded-2xl border border-white/20 bg-[#0B132B]/95 p-3 text-white shadow-2xl sm:-right-7"><div className="flex items-center gap-2"><Flame className="h-5 w-5 text-orange-400"/><div><strong className="block text-sm">7 {t('landing.preview.days')}</strong><span className="text-[9px] uppercase tracking-wider text-slate-400">{t('landing.preview.streak')}</span></div></div></div>
+  </div>;
 }
 
-function FeaturesSection() {
-  return (
-    <section id="features" className="bg-slate-50 page-section">
-      <div className="section-shell">
-        <div className="max-w-2xl">
-          <p className="section-kicker">Why Thinkers</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-[#0B132B] sm:text-4xl lg:text-5xl">Everything you need to keep learning moving.</h2>
-        </div>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {benefits.map(([Icon, title, text]) => (
-            <div key={title} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.28)]">
-              <Icon className="h-7 w-7 text-[#0B132B]" />
-              <h3 className="mt-6 text-xl font-bold tracking-[-0.03em] text-[#0B132B]">{title}</h3>
-              <p className="mt-3 leading-7 text-[#4A4A4A]">{text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AboutSection() {
-  const values = [
-    ['Focused', 'Learning paths without unnecessary noise.'],
-    ['Flexible', 'Learn at your own pace, on any device.'],
-    ['Measurable', 'Progress and assessment built in.'],
+function SocialProof({ courseCount }) {
+  const { t } = useTranslation();
+  const items = [
+    { value: courseCount ? `${courseCount}+` : '—', label: t('landing.proof.courses'), icon: BookOpenCheck },
+    { value: '6', label: t('landing.proof.tools'), icon: Sparkles },
+    { value: '100%', label: t('landing.proof.progress'), icon: CheckCircle2 },
+    { value: t('landing.proof.verifiedValue'), label: t('landing.proof.achievements'), icon: Award },
   ];
-
-  return (
-    <section id="about" className="page-section">
-      <div className="section-shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-        <div>
-          <p className="section-kicker">About Thinkers</p>
-          <h2 className="section-title">A clearer way to learn online.</h2>
-          <p className="mt-5 leading-7 text-slate-600">We built Thinkers around what matters: trustworthy instructors, thoughtfully structured content, and learning progress you can see.</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {values.map(([title, text]) => (
-            <div key={title} className="rounded-2xl border border-slate-200 p-6">
-              <h3 className="font-bold text-slate-950">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+  return <section className="relative z-10 border-b border-slate-200/70 bg-white/82 shadow-[0_20px_60px_-48px_rgba(15,23,42,.45)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/82" aria-label={t('landing.proof.label')}><div className="section-shell grid grid-cols-2 divide-x divide-y divide-slate-200 dark:divide-slate-800 sm:grid-cols-4 sm:divide-y-0">{items.map(({ value, label, icon: Icon }) => <div key={label} className="flex items-center justify-center gap-3 px-3 py-7 sm:py-8"><Icon className="h-5 w-5 shrink-0 text-amber-600"/><div><strong className="block text-xl font-extrabold text-slate-950 dark:text-white sm:text-2xl">{value}</strong><span className="text-xs font-semibold text-slate-500 sm:text-sm">{label}</span></div></div>)}</div></section>;
 }
 
-function HeroIllustration() {
-  const reduceMotion = useReducedMotion();
+function FeatureShowcase({ icon: Icon, title, description, index }) {
+  return <article className={`landing-card group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-7 shadow-[0_18px_50px_-40px_rgba(15,23,42,.3)] dark:border-slate-700/80 dark:bg-slate-900 ${index === 0 || index === 5 ? 'xl:col-span-2' : ''}`}><div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-amber-300/10 blur-2xl transition group-hover:bg-amber-300/20"/><span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-[#F5C542] text-[#0B132B] shadow-[0_12px_28px_-14px_rgba(245,197,66,.8)]"><Icon className="h-6 w-6"/></span><h3 className="relative mt-6 text-xl font-extrabold text-slate-950 dark:text-white">{title}</h3><p className="relative mt-3 max-w-xl leading-7 text-slate-600 dark:text-slate-300">{description}</p><span className="relative mt-6 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.16em] text-amber-700 dark:text-amber-300">{String(index + 1).padStart(2, '0')} <span className="h-px w-8 bg-amber-300"/></span></article>;
+}
 
-  return (
-    <m.div
-      className="relative mx-auto w-full max-w-[760px] lg:mx-0"
-      aria-label="Thinkers bulb logo animation"
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.92, y: 18 }}
-      animate={reduceMotion ? undefined : { opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 1, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <m.div
-        className="relative mx-auto flex min-h-[520px] w-full items-center justify-center lg:min-h-[640px]"
-        animate={reduceMotion ? undefined : { y: [0, -10, 0] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <m.div
-          className="absolute h-[330px] w-[330px] rounded-full bg-[radial-gradient(circle,rgba(245,197,66,0.34)_0%,rgba(245,197,66,0.13)_38%,transparent_70%)] blur-2xl"
-          initial={reduceMotion ? false : { opacity: 0, scale: 0.55 }}
-          animate={reduceMotion ? { opacity: 0.38 } : { opacity: [0, 0.5, 0.35, 0.5], scale: [0.55, 1, 0.94, 1] }}
-          transition={reduceMotion ? undefined : { duration: 7, times: [0, 0.3, 0.65, 1], repeat: Infinity, repeatDelay: 0.4, ease: "easeInOut" }}
-        >
-        </m.div>
-        <m.img
-          src="/favicon.png"
-          alt="Thinkers light bulb"
-          className="relative z-10 h-[300px] w-[300px] select-none object-contain sm:h-[360px] sm:w-[360px]"
-          initial={reduceMotion ? false : { filter: "brightness(0.42) saturate(0.65) drop-shadow(0 0 0 rgba(245,197,66,0))" }}
-          animate={reduceMotion ? undefined : { filter: ["brightness(0.42) saturate(0.65) drop-shadow(0 0 0 rgba(245,197,66,0))", "brightness(1) saturate(1) drop-shadow(0 0 22px rgba(245,197,66,0.46))", "brightness(0.94) saturate(1) drop-shadow(0 0 14px rgba(245,197,66,0.30))", "brightness(1) saturate(1) drop-shadow(0 0 22px rgba(245,197,66,0.46))"] }}
-          transition={{ duration: 7, times: [0, 0.3, 0.65, 1], repeat: Infinity, repeatDelay: 0.4, ease: "easeInOut" }}
-        />
-      </m.div>
-    </m.div>
-  );
+function Step({ number, icon: Icon, title, description, index, label }) {
+  return <article style={{ '--card-index': index }} className="landing-card relative rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-[0_20px_55px_-42px_rgba(15,23,42,0.35)]"><span className="relative z-10 mx-auto grid h-20 w-20 place-items-center rounded-full border-8 border-white bg-[#F5C542] text-[#0B132B] shadow-lg"><Icon className="h-7 w-7" /></span><span className="mt-6 block text-xs font-extrabold tracking-[0.2em] text-amber-600">{label || number}</span><h3 className="mt-2 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-600">{description}</p></article>;
+}
+
+function CourseSkeletons({ label }) {
+  return <div className="mt-10 grid gap-7 md:grid-cols-2 lg:grid-cols-3" aria-label={label}>{[1, 2, 3].map(item => <div key={item} className="h-[430px] animate-pulse rounded-3xl bg-white shadow-sm" />)}</div>;
+}
+
+function CallToAction() {
+  const { t } = useTranslation();
+  return <section className="deferred-section page-section bg-transparent"><div className="section-shell"><div className="relative overflow-hidden rounded-[2rem] border border-amber-200 bg-[linear-gradient(135deg,rgba(255,249,223,.9),rgba(255,253,245,.82))] px-6 py-14 text-center shadow-[0_28px_85px_-44px_rgba(183,121,31,0.5)] backdrop-blur-xl dark:border-amber-300/20 dark:bg-[linear-gradient(135deg,rgba(20,32,53,.97),rgba(9,18,33,.95))] dark:shadow-[0_32px_90px_-46px_rgba(245,197,66,.24)] sm:px-12 sm:py-16"><div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[#F5C542]/25 blur-3xl dark:bg-[#F5C542]/12"/><div className="relative"><SectionTitle eyebrow={t('landing.cta.eyebrow')} title={t('landing.cta.title')} description={t('landing.cta.description')} align="center"/><div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row"><Link to="/register"><Button variant="accent" size="lg" className="w-full sm:w-auto">{t('landing.cta.create')}</Button></Link><Link to="/contact"><Button variant="secondary" size="lg" className="w-full sm:w-auto">{t('landing.cta.contact')}</Button></Link></div></div></div></div></section>;
 }

@@ -1,0 +1,22 @@
+{
+  "back": "Back to course",
+  "backToCourses": "Browse courses",
+  "course": "Course checkout",
+  "instructor": "Instructor: {{name}}",
+  "secure": "Your order is created securely from the course price stored by Thinkers.",
+  "summary": "Order summary",
+  "total": "Total",
+  "continue": "Continue to payment",
+  "creating": "Creating order…",
+  "purchased": "Already purchased",
+  "purchasedHelp": "Your paid order is confirmed and course access is available.",
+  "pending": "Payment pending",
+  "pendingHelp": "Your order is ready for a future payment gateway.",
+  "paymentPending": "Payment Pending",
+  "startLearning": "Start Learning",
+  "gatewayNotice": "No payment will be collected yet. Payment gateway support is coming later.",
+  "retry": "Your previous order is {{status}}. You can create a new pending order.",
+  "statuses": { "pending": "Pending", "paid": "Paid", "failed": "Failed", "refunded": "Refunded" },
+  "purchases": { "eyebrow": "Order history", "title": "Purchases", "empty": "You have no course purchases yet.", "explore": "Explore paid courses", "tryAgain": "Create another order" },
+  "errors": { "load": "Checkout information could not be loaded.", "create": "The order could not be created.", "enroll": "Course access could not be started.", "orders": "Your purchases could not be loaded." }
+}

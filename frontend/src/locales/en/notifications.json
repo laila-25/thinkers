@@ -1,0 +1,25 @@
+{
+  "bell": "Notifications, {{count}} unread",
+  "title": "Notifications",
+  "eyebrow": "Your activity center",
+  "unread_one": "{{count}} unread notification",
+  "unread_other": "{{count}} unread notifications",
+  "markAll": "Mark all as read",
+  "settings": "Notification settings",
+  "viewAll": "View all notifications",
+  "empty": "You’re all caught up. New activity will appear here.",
+  "error": "Notifications could not be loaded.",
+  "retry": "Try again",
+  "loading": "Loading…",
+  "loadMore": "Load more",
+  "close": "Close",
+  "saveSettings": "Save preferences",
+  "saving": "Saving…",
+  "saved": "Preferences saved",
+  "preferences": {
+    "course_updates": "Course updates",
+    "learning_activity": "Learning activity",
+    "commerce": "Purchases and revenue",
+    "platform_alerts": "Platform and security alerts"
+  }
+}

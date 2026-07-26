@@ -1,0 +1,20 @@
+import api from '../../api/client';
+
+const data = response => response.data.data;
+export const getDashboard = () => api.get('/api/admin/dashboard').then(data);
+export const getUsers = (params, signal) => api.get('/api/admin/users', { params, signal }).then(response => response.data);
+export const getUser = id => api.get(`/api/admin/users/${id}`).then(data);
+export const updateAdminAccess = (id, isAdmin) => api.patch(`/api/admin/users/${id}/admin-access`, { is_admin: isAdmin }).then(data);
+export const getCourses = (params, signal) => api.get('/api/admin/courses', { params, signal }).then(response => response.data);
+export const getInstructors = params => api.get('/api/admin/instructors', { params }).then(response => response.data);
+export const updateInstructor = (id, payload) => api.patch(`/api/admin/instructors/${id}/status`, payload).then(data);
+export const moderateCourse = (id, action, reason) => api.post(`/api/admin/courses/${id}/${action}`, { reason }).then(data);
+export const getCategories = () => api.get('/api/admin/categories').then(response => response.data);
+export const createCategory = payload => api.post('/api/admin/categories', payload).then(data);
+export const updateCategory = (id, payload) => api.put(`/api/admin/categories/${id}`, payload).then(data);
+export const deleteCategory = id => api.delete(`/api/admin/categories/${id}`);
+export const getAiUsage = () => api.get('/api/admin/ai-usage').then(data);
+export const getRevenue = () => api.get('/api/admin/revenue').then(data);
+export const getOrders = (params, signal) => api.get('/api/orders', { params, signal }).then(response => response.data);
+export const getActivity = (params, signal) => api.get('/api/admin/activity', { params, signal }).then(response => response.data);
+export const getAdminNotifications = () => api.get('/api/admin/notifications').then(data);

@@ -1,26 +1,47 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import ThemeContext from './theme-context';
 
-const getInitialTheme = () => {
+const systemTheme = () => window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+
+const getInitialPreference = () => {
+  if (typeof window === 'undefined') return 'system';
   const saved = window.localStorage.getItem('thinkers-theme');
-  if (saved === 'light' || saved === 'dark') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return saved === 'light' || saved === 'dark' ? saved : 'system';
 };
 
 export default function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(getInitialTheme);
+  const [preference, setPreference] = useState(getInitialPreference);
+  const [theme, setResolvedTheme] = useState(() => typeof document === 'undefined' ? 'light' : document.documentElement.dataset.theme || 'light');
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem('thinkers-theme', theme);
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => {
+      const resolved = preference === 'system' ? systemTheme() : preference;
+      setResolvedTheme(resolved);
+      document.documentElement.dataset.theme = resolved;
+      document.documentElement.style.colorScheme = resolved;
+    };
+    apply();
+    if (preference === 'system') media.addEventListener('change', apply);
+    if (preference === 'system') window.localStorage.removeItem('thinkers-theme');
+    else window.localStorage.setItem('thinkers-theme', preference);
+    return () => media.removeEventListener('change', apply);
+  }, [preference]);
+
+  const toggleTheme = useCallback(() => {
+    setPreference(theme === 'dark' ? 'light' : 'dark');
   }, [theme]);
+
+  const useSystemTheme = useCallback(() => setPreference('system'), []);
 
   const value = useMemo(() => ({
     theme,
+    preference,
     isDark: theme === 'dark',
-    toggleTheme: () => setTheme(current => current === 'dark' ? 'light' : 'dark'),
-  }), [theme]);
+    toggleTheme,
+    setTheme: setPreference,
+    useSystemTheme,
+  }), [preference, theme, toggleTheme, useSystemTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

@@ -1,0 +1,18 @@
+{
+  "title": "Verify your email address",
+  "description": "We sent a verification link to {{email}}. Verify your email to use learning and AI features.",
+  "resend": "Resend email",
+  "sending": "Sending…",
+  "sent": "Email sent",
+  "retry": "Try again",
+  "checkingTitle": "Verifying your email",
+  "checkingDescription": "Please wait while we securely verify your email address.",
+  "successTitle": "Email verified",
+  "successDescription": "Your email address is verified and your Thinkers account is ready.",
+  "invalidTitle": "Verification link is invalid",
+  "invalidDescription": "This verification link is invalid or has expired. Request a new link from your account.",
+  "loginTitle": "Sign in required",
+  "loginDescription": "Sign in to the account that owns this email, then open the verification link again.",
+  "dashboard": "Continue to dashboard",
+  "signIn": "Sign in"
+}

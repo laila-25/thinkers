@@ -1,12 +1,14 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import useAuth from '../context/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function ProtectedRoute() {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return <div className="min-h-[50vh] flex items-center justify-center text-slate-500">Loading...</div>;
+    return <div className="min-h-[50vh] flex items-center justify-center text-slate-500">{t('actions.loading')}</div>;
   }
 
   return isAuthenticated

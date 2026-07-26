@@ -1,0 +1,12 @@
+import { Bell, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { PageHeading } from './AdminUsersPage';
+import { useToast as useAdminToast } from '../../components/ui';
+
+export default function AdminSettingsPage() {
+  const [preferences, setPreferences] = useState({ moderation: true, instructors: true, ai: false }); const toast = useAdminToast();
+  const save = event => { event.preventDefault(); window.localStorage.setItem('thinkers-admin-preferences', JSON.stringify(preferences)); toast({ message: 'Dashboard preferences saved.' }); };
+  return <div className="space-y-6"><PageHeading title="Settings" description="Administrator workspace preferences and security posture."/><div className="grid gap-6 xl:grid-cols-[1fr_.8fr]"><form onSubmit={save} className="rounded-2xl border bg-white p-6"><div className="flex items-center gap-3"><Bell className="h-5 w-5 text-amber-600"/><h3 className="font-extrabold">Notification preferences</h3></div><div className="mt-5 space-y-3"><Toggle label="Course moderation requests" checked={preferences.moderation} change={value => setPreferences({ ...preferences, moderation: value })}/><Toggle label="Instructor applications" checked={preferences.instructors} change={value => setPreferences({ ...preferences, instructors: value })}/><Toggle label="AI usage threshold alerts" checked={preferences.ai} change={value => setPreferences({ ...preferences, ai: value })}/></div><button className="action mt-6">Save preferences</button></form><div className="space-y-4"><Info icon={ShieldCheck} title="Role protection" text="Admin access is enforced by Sanctum and backend permissions."/><Info icon={LockKeyhole} title="Verified sessions" text="Sensitive APIs require authenticated, verified accounts."/><Info icon={Mail} title="System email" text="Email delivery is controlled through Laravel mail configuration."/></div></div></div>;
+}
+function Toggle({ label, checked, change }) { return <label className="flex cursor-pointer items-center justify-between rounded-xl border p-4"><span className="font-semibold">{label}</span><input type="checkbox" checked={checked} onChange={e => change(e.target.checked)} className="h-5 w-5 accent-amber-500"/></label>; }
+function Info({ icon: Icon, title, text }) { return <div className="rounded-2xl border bg-white p-5"><Icon className="h-5 w-5 text-amber-600"/><h3 className="mt-3 font-extrabold">{title}</h3><p className="mt-1 text-sm leading-6 text-slate-500">{text}</p></div>; }

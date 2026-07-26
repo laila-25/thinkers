@@ -1,0 +1,11 @@
+{
+  "nav": {"dashboard":"Dashboard","users":"Users","courses":"Courses","instructors":"Instructor Requests","categories":"Categories","ai":"AI Usage","reports":"Reports","revenue":"Revenue","orders":"Orders","activity":"Audit Activity","settings":"Settings"},
+  "workspace":"Admin workspace","administrator":"Administrator","search":"Search the workspace","notifications":"Notifications","noNotifications":"No operational alerts.","viewPlatform":"View platform","signOut":"Sign out",
+  "notification":{"instructor":"{{count}} instructor applications require review.","course":"{{count}} courses require moderation.","order":"{{count}} failed orders require attention."},
+  "revenue":{"title":"Revenue analytics","description":"Monitor marketplace sales and platform revenue distribution.","totalSales":"Total sales","gross":"Gross revenue","platform":"Platform revenue","instructors":"Instructor earnings","monthly":"Monthly revenue","empty":"Revenue will appear after completed sales."},
+  "orders":{"title":"Order monitoring","description":"Monitor marketplace order state without modifying payment records.","filter":"Filter orders","all":"All order statuses","order":"Order","customer":"Customer","course":"Course","amount":"Amount","status":"Status","date":"Created","empty":"No orders match this filter."},
+  "activity":{"title":"Audit activity","description":"A tamper-resistant operational timeline of sensitive administrator actions.","refresh":"Refresh activity","system":"System","empty":"No administrator activity has been recorded yet."},
+  "status":{"pending":"Pending","paid":"Paid","failed":"Failed","refunded":"Refunded"},
+  "actions":{"course.approved":"Course approved","course.rejected":"Course rejected","course.archived":"Course archived","instructor.approved":"Instructor approved","instructor.rejected":"Instructor rejected","instructor.pending":"Instructor returned to pending","admin.granted":"Administrator access granted","admin.revoked":"Administrator access revoked"},
+  "pagination":"Page {{current}} of {{last}}","previous":"Previous","next":"Next"
+}

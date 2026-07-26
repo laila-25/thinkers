@@ -1,0 +1,11 @@
+import { useState } from 'react';
+import { CheckCircle2, X } from 'lucide-react';
+import { motion as m } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+
+export default function AIQuizCard({ questions, onClose }) {
+  const { t } = useTranslation('ai'); const [answers, setAnswers] = useState({}); const [submitted, setSubmitted] = useState(false);
+  if (!questions?.length) return null;
+  const score = questions.filter(question => answers[question.id] === question.answer).length;
+  return <m.article initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"><div className="flex justify-between"><h3 className="text-xl font-bold">{t('quizTool.title')}</h3><button type="button" onClick={onClose} aria-label={t('lessonActions.close')}><X className="h-5 w-5"/></button></div><div className="mt-5 space-y-5">{questions.map((question, index) => <fieldset key={question.id} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"><legend className="px-2 font-bold">{index + 1}. {question.question}</legend><div className="mt-3 grid gap-2 sm:grid-cols-2">{question.options.map((option, optionIndex) => <label key={option} className={`rounded-lg border p-3 text-sm ${submitted && optionIndex === question.answer ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-200 dark:border-slate-700'}`}><input type="radio" className="me-2" name={`lesson-ai-${question.id}`} checked={answers[question.id] === optionIndex} disabled={submitted} onChange={() => setAnswers(current => ({ ...current, [question.id]: optionIndex }))}/>{option}</label>)}</div>{submitted && <p className="mt-3 flex gap-2 text-sm text-slate-600 dark:text-slate-300"><CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600"/>{question.explanation}</p>}</fieldset>)}</div>{submitted ? <p className="mt-5 font-bold">{t('quizTool.score', { score: Math.round(score / questions.length * 100) })}</p> : <button type="button" onClick={() => setSubmitted(true)} disabled={Object.keys(answers).length !== questions.length} className="action mt-5">{t('quizTool.check')}</button>}</m.article>;
+}
