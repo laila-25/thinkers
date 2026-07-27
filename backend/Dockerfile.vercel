@@ -20,6 +20,9 @@ RUN apt-get update \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && a2enmod headers rewrite \
+    && sed -ri 's/^Listen [0-9]+$/Listen ${PORT}/' /etc/apache2/ports.conf \
+    && sed -ri 's/<VirtualHost \*:[0-9]+>/<VirtualHost *:${PORT}>/' \
+        /etc/apache2/sites-available/000-default.conf \
     && sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
         /etc/apache2/sites-available/*.conf \
         /etc/apache2/apache2.conf \
@@ -79,4 +82,4 @@ RUN mkdir -p \
 
 EXPOSE 80
 
-CMD ["sh", "-c", "mkdir -p /tmp/thinkers/storage/app/private/course-media /tmp/thinkers/storage/app/private/certificates /tmp/thinkers/storage/app/public /tmp/thinkers/storage/framework/cache/data /tmp/thinkers/storage/framework/sessions /tmp/thinkers/storage/framework/views /tmp/thinkers/storage/logs && chown -R www-data:www-data /tmp/thinkers && chmod -R ug+rwX /tmp/thinkers && exec apache2-foreground"]
+CMD ["sh", "-c", "umask 000 && mkdir -p /tmp/thinkers/storage/app/private/course-media /tmp/thinkers/storage/app/private/certificates /tmp/thinkers/storage/app/public /tmp/thinkers/storage/framework/cache/data /tmp/thinkers/storage/framework/sessions /tmp/thinkers/storage/framework/views /tmp/thinkers/storage/logs && exec apache2-foreground"]
