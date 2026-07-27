@@ -4,7 +4,8 @@ FROM php:8.3-apache-bookworm
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
     COMPOSER_ALLOW_SUPERUSER=1 \
-    PORT=80
+    PORT=80 \
+    VIEW_COMPILED_PATH=/tmp
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -67,19 +68,8 @@ RUN mkdir -p \
         --no-scripts \
     && php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R ug+rwX storage bootstrap/cache \
-    && rm -rf \
-        storage/app \
-        storage/framework/cache \
-        storage/framework/sessions \
-        storage/framework/views \
-        storage/logs \
-    && ln -s /tmp/thinkers/storage/app storage/app \
-    && ln -s /tmp/thinkers/storage/framework/cache storage/framework/cache \
-    && ln -s /tmp/thinkers/storage/framework/sessions storage/framework/sessions \
-    && ln -s /tmp/thinkers/storage/framework/views storage/framework/views \
-    && ln -s /tmp/thinkers/storage/logs storage/logs
+    && chmod -R ug+rwX storage bootstrap/cache
 
 EXPOSE 80
 
-CMD ["sh", "-c", "umask 000 && mkdir -p /tmp/thinkers/storage/app/private/course-media /tmp/thinkers/storage/app/private/certificates /tmp/thinkers/storage/app/public /tmp/thinkers/storage/framework/cache/data /tmp/thinkers/storage/framework/sessions /tmp/thinkers/storage/framework/views /tmp/thinkers/storage/logs && exec apache2-foreground"]
+CMD ["apache2-foreground"]
