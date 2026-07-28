@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: '',
   headers: {
     Accept: 'application/json',
   },
@@ -16,10 +16,7 @@ api.interceptors.request.use(config => {
 });
 
 export const apiUrl = path => {
-  const baseURL = api.defaults.baseURL?.replace(/\/+$/, '');
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-
-  return baseURL ? `${baseURL}${normalizedPath}` : normalizedPath;
+  return path.startsWith('/') ? path : `/${path}`;
 };
 
 export default api;

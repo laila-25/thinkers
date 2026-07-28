@@ -8,10 +8,6 @@
     {
       "source": "/sanctum/:path*",
       "destination": "https://thinkers-production-a678.up.railway.app/sanctum/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
