@@ -1,40 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
+import api from '../api/client';
 import AuthContext from './auth-context';
 
-const cookieValue = name => document.cookie
-  .split('; ')
-  .find(cookie => cookie.startsWith(`${name}=`))
-  ?.slice(name.length + 1);
-
 async function authRequest(url, options = {}) {
-  const timeoutController = new AbortController();
-  const timeoutId = window.setTimeout(() => timeoutController.abort(), 6000);
-  const signal = options.signal && typeof AbortSignal.any === 'function'
-    ? AbortSignal.any([options.signal, timeoutController.signal])
-    : timeoutController.signal;
-  const headers = new Headers(options.headers);
-  headers.set('Accept', 'application/json');
-  headers.set('Accept-Language', window.localStorage.getItem('thinkers-language') === 'ar' ? 'ar' : 'en');
+  const { body, ...config } = options;
+  const data = typeof body === 'string' ? JSON.parse(body) : body;
 
-  const csrfToken = cookieValue('XSRF-TOKEN');
-  if (csrfToken) headers.set('X-XSRF-TOKEN', decodeURIComponent(csrfToken));
-  if (options.body) headers.set('Content-Type', 'application/json');
-
-  let response;
-  try {
-    response = await fetch(url, { ...options, signal, headers, credentials: 'include' });
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-  const data = response.status === 204 ? null : await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const error = new Error(data?.message || `Request failed with status ${response.status}`);
-    error.response = { status: response.status, data };
-    throw error;
-  }
-
-  return { data };
+  return api.request({
+    url,
+    timeout: 6000,
+    ...config,
+    data,
+  });
 }
 
 export function AuthProvider({ children }) {

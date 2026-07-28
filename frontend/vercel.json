@@ -2,14 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://thinkers-cmcw.vercel.app/api/:path*"
-    },
-    {
-      "source": "/sanctum/:path*",
-      "destination": "https://thinkers-cmcw.vercel.app/sanctum/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

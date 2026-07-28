@@ -7,6 +7,7 @@ import CourseCard from '../components/CourseCard';
 import FeatureCard from '../components/FeatureCard';
 import SectionTitle from '../components/SectionTitle';
 import PageBackground from '../components/PageBackground';
+import api from '../api/client';
 
 const whyIcons = [ShieldCheck, UsersRound, BarChart3];
 const featureIcons = [Bot, Layers3, CirclePlay, Trophy, Award, BarChart3];
@@ -21,8 +22,8 @@ export default function Landing() {
 
   useEffect(() => {
     let active = true;
-    const load = () => fetch('/api/courses?per_page=3', { headers: { Accept: 'application/json' } })
-      .then(response => response.ok ? response.json() : Promise.reject(new Error('Course request failed')))
+    const load = () => api.get('/api/courses', { params: { per_page: 3 } })
+      .then(response => response.data)
       .then(data => { if (active) { setCourses((data.data || []).slice(0, 3)); setCourseCount(data.meta?.total || data.data?.length || 0); } })
       .catch(() => {})
       .finally(() => { if (active) setStatus('ready'); });
