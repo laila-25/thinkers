@@ -30,5 +30,11 @@ class DatabaseSeeder extends Seeder
             );
             $user->syncRoles('student');
         }
+
+        $adminEmail = trim((string) env('ADMIN_EMAIL'));
+
+        if ($adminEmail !== '') {
+            User::where('email', $adminEmail)->first()?->syncRoles('admin');
+        }
     }
 }
