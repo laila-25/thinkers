@@ -22,6 +22,8 @@ class RolePermissionSeeder extends Seeder
             Permission::findOrCreate($permission, 'web');
         }
 
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         Role::findOrCreate('student', 'web');
         Role::findOrCreate('instructor', 'web')->syncPermissions([
             'courses.create', 'courses.update.own', 'courses.submit',
