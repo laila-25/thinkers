@@ -34,7 +34,12 @@ class DatabaseSeeder extends Seeder
         $adminEmail = trim((string) env('ADMIN_EMAIL'));
 
         if ($adminEmail !== '') {
-            User::where('email', $adminEmail)->first()?->syncRoles('admin');
+            $admin = User::where('email', $adminEmail)->first();
+
+            if ($admin) {
+                $admin->forceFill(['email_verified_at' => $admin->email_verified_at ?? now()])->save();
+                $admin->syncRoles('admin');
+            }
         }
     }
 }
